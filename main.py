@@ -1,6 +1,7 @@
 from hardware import VirtualMachine
 from system_uzytkownikow import SystemLogger, AdminProfile
 from apps_package import CodeBreakerGame, NetCrawlerRPG
+from apps_extended import ComputerScienceQuizApp, ProgrammingQuizApp, NetworkSecurityLab
 
 
 def clear_screen() -> None:
@@ -120,9 +121,14 @@ def main() -> None:
     machine = VirtualMachine("Ryzen 9", 4.0, 1024)
     logger = SystemLogger()
     current_user = AdminProfile("Root_Hacker", "admin123")
+
+    # Rozszerzona baza aplikacji z quizami edukacyjnymi
     system_apps = {
         "codebreaker": CodeBreakerGame(),
-        "crawler": NetCrawlerRPG()
+        "crawler": NetCrawlerRPG(),
+        "csquiz": ComputerScienceQuizApp(),
+        "progquiz": ProgrammingQuizApp(),
+        "networksec": NetworkSecurityLab()
     }
 
     # Włącz system
