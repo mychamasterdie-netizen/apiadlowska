@@ -2,6 +2,7 @@ from hardware import VirtualMachine
 from system_uzytkownikow import SystemLogger, AdminProfile
 from apps_package import CodeBreakerGame, NetCrawlerRPG
 from apps_extended import ComputerScienceQuizApp, ProgrammingQuizApp, NetworkSecurityLab
+from games_advanced import AmongUsGame, MinesweeperGame, CodingChallengeGame
 
 
 def clear_screen() -> None:
@@ -49,10 +50,21 @@ def display_available_apps(system_apps: dict) -> None:
     print("DOSTĘPNE APLIKACJE".center(70))
     print("=" * 70 + "\n")
 
-    for app_name, app_instance in system_apps.items():
-        print(f"  📱 {app_instance.name}")
-        print(f"     Wymagania RAM: {app_instance.ram_required}MB")
-        print(f"     Komenda: run {app_name}")
+    categories = {
+        "🎮 GRY LOGICZNE": ["codebreaker", "crawler", "minesweeper"],
+        "📚 QUIZY EDUKACYJNE": ["csquiz", "progquiz"],
+        "🔐 BEZPIECZEŃSTWO": ["networksec"],
+        "🚀 GRY ZAAWANSOWANE": ["amongus", "codingchallenge"]
+    }
+
+    for category, apps in categories.items():
+        print(f"{category}:")
+        for app_name in apps:
+            if app_name in system_apps:
+                app = system_apps[app_name]
+                print(f"  📱 {app.name}")
+                print(f"     Wymagania RAM: {app.ram_required}MB")
+                print(f"     Komenda: run {app_name}")
         print()
 
     print("=" * 70)
@@ -122,24 +134,39 @@ def main() -> None:
     logger = SystemLogger()
     current_user = AdminProfile("Root_Hacker", "admin123")
 
-    # Rozszerzona baza aplikacji z quizami edukacyjnymi
+    # Rozszerzona baza aplikacji ze wszystkimi grami i quizami
     system_apps = {
+        # Gry logiczne
         "codebreaker": CodeBreakerGame(),
         "crawler": NetCrawlerRPG(),
+        "minesweeper": MinesweeperGame(),
+        
+        # Quizy edukacyjne
         "csquiz": ComputerScienceQuizApp(),
         "progquiz": ProgrammingQuizApp(),
-        "networksec": NetworkSecurityLab()
+        
+        # Bezpieczeństwo
+        "networksec": NetworkSecurityLab(),
+        
+        # Gry zaawansowane
+        "amongus": AmongUsGame(),
+        "codingchallenge": CodingChallengeGame()
     }
+
+    # Rozszerz dostęp admina do wszystkich aplikacji
+    current_user.allowed_apps = list(system_apps.keys())
 
     # Włącz system
     machine.power_status = True
     logger.log_event("Włączono system operacyjny RetroOS")
     logger.log_event(f"Zalogowano użytkownika: {current_user.username}")
+    logger.log_event(f"Dostępne aplikacje: {len(system_apps)}")
 
     print("\n" + "*" * 70)
     print("* RETRO OS - WELCOME *".center(70))
     print("*" * 70)
     print("\nSystem uruchomiony pomyślnie.")
+    print(f"Dostępnych aplikacji: {len(system_apps)}")
     input("Naciśnij Enter aby kontynuować...")
 
     # Główna pętla systemu
