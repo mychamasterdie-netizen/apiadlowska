@@ -1,8 +1,7 @@
-"""Authentication and user management (JSON storage)"""
+"""Authentication and user management (JSON storage) using bcrypt"""
 
 import os
-import hashlib
-import binascii
+import bcrypt
 from typing import List
 from .models.user import User, Admin, Employee
 from .storage import load_json, save_json
@@ -11,20 +10,15 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 USERS_PATH = os.path.join(DATA_DIR, "users.json")
 
 
-def _hash_password(password: str, salt: bytes = None) -> str:
-    # Simple salted SHA256: store as hex(salt)$hex(hash)
-    if salt is None:
-        salt = os.urandom(16)
-    hash_bytes = hashlib.sha256(salt + password.encode("utf-8")).digest()
-    return binascii.hexlify(salt).decode() + "$" + binascii.hexlify(hash_bytes).decode()
+def _hash_password(password: str) -> str:
+    # bcrypt hashing, store as utf-8 string
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
 
 def _verify_password(password: str, stored: str) -> bool:
     try:
-        salt_hex, hash_hex = stored.split("$")
-        salt = binascii.unhexlify(salt_hex)
-        h = hashlib.sha256(salt + password.encode("utf-8")).digest()
-        return binascii.hexlify(h).decode() == hash_hex
+        return bcrypt.checkpw(password.encode('utf-8'), stored.encode('utf-8'))
     except Exception:
         return False
 
@@ -52,11 +46,8 @@ def create_user(username: str, password: str, role: str = "employee") -> User:
     users = load_users()
     if any(u.username == username for u in users):
         raise ValueError("User exists")
-    u = User(id=None, username=username, password_hash=_hash_password(password), role=role)
-    # ensure id set
-    if not u.id:
-        import uuid
-        u.id = str(uuid.uuid4())
+    import uuid
+    u = User(id=str(uuid.uuid4()), username=username, password_hash=_hash_password(password), role=role)
     users.append(u)
     save_users(users)
     return u
